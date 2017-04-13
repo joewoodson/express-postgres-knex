@@ -31,12 +31,28 @@ app.get('/time', function(req, res) {
 });
 
 // **** Get all shows ******* //
-app.get('/shows', function(req, res,next) {
+app.get('/shows', function(req, res, next) {
   queries.getAll()
   .then(function(shows) {
     res.status(200).json(shows);
   })
   .catch(function(error) {
+    next(error);
+  });
+});
+
+// **** Get single show ***** //
+app.get('/show/:id', function(req, res, next) {
+  queries.getSingle(req.params.id)
+  .then(function(show) {
+    if (!show) {
+      res.status(404);
+      res.send('No show found');
+    }
+    res.status(200).json(show);
+  })
+  .catch(function(error) {
+    res.render('error', { error: err });
     next(error);
   });
 });
