@@ -4,6 +4,7 @@ var app = express();
 var pg = require('pg');
 
 var router = require('./routes/index');
+var queries = require('./db/queries');
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -29,8 +30,15 @@ app.get('/time', function(req, res) {
   res.send(result);
 });
 
-app.get('/shows', function(request, response) {
-  response.send('send shows back');
+// **** Get all shows ******* //
+app.get('/shows', function(req, res,next) {
+  queries.getAll()
+  .then(function(shows) {
+    res.status(200).json(shows);
+  })
+  .catch(function(error) {
+    next(error);
+  });
 });
 
 app.get('/db', function (request, response) {
