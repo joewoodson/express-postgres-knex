@@ -3,6 +3,8 @@ var express = require('express');
 var app = express();
 var pg = require('pg');
 
+var router = require('./routes/index');
+
 app.set('port', (process.env.PORT || 5000));
 
 app.use(express.static(__dirname + '/public'));
@@ -25,6 +27,10 @@ app.get('/time', function(req, res) {
   for (i=0; i < times; i++)
     result += i + ' ';
   res.send(result);
+});
+
+app.get('/shows', function(request, response) {
+  response.send('send shows back');
 });
 
 app.get('/db', function (request, response) {
