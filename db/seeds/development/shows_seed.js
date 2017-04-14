@@ -32,5 +32,13 @@ exports.seed = function(knex, Promise) {
         rating: 3,
         explicit: false
       });
+    }).then(function () {
+      return knex('shows').insert({
+        name: 'The Wire',
+        channel: 'HBO',
+        genre: 'Drama',
+        rating: 5,
+        explicit: true
+      });
     });
 };

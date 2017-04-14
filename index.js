@@ -1,4 +1,5 @@
 var cool = require('cool-ascii-faces');
+var bodyParser = require('body-parser');
 var express = require('express');
 var app = express();
 var pg = require('pg');
@@ -9,6 +10,8 @@ var queries = require('./db/queries');
 app.set('port', (process.env.PORT || 5000));
 
 app.use(express.static(__dirname + '/public'));
+
+app.use(require('body-parser').json());
 
 // views is directory for all template files
 app.set('views', __dirname + '/views');
@@ -57,6 +60,55 @@ app.get('/show/:id', function(req, res, next) {
   });
 });
 
+// *** Add show *** //
+app.post('/shows', function(req, res, next) {
+  queries.add(req.body)
+  .then(function(showID) {
+    return queries.getSingle(showID);
+  })
+  .then(function(show) {
+    res.status(200).json(show);
+  })
+  .catch(function(error) {
+    next(error);
+  });
+});
+
+// **** Update show ******* //
+app.put('/shows/:id', function(req, res, next) {
+  if(req.body.hasOwnProperty('id')) {
+    return res.status(422).json({
+      error: 'You cannot update the ID field'
+    });
+  }
+  queries.update(req.params.id, req.body)
+  .then(function(showID) {
+    return queries.getSingle(req.params.id);
+  })
+  .then(function(show) {
+    res.status(200).json(show);
+  })
+  .catch(function(error) {
+    next(error);
+  });
+});
+
+// *** Delete show *** //
+app.delete('/shows/:id', function(req, res, next) {
+  queries.getSingle(req.params.id)
+  .then(function(show) {
+    queries.deleteItem(req.params.id)
+    .then(function() {
+      res.status(200).json(show);
+    })
+    .catch(function(error) {
+      next(error);
+    });
+  }).catch(function(error) {
+    next(error);
+  });
+});
+
 app.get('/db', function (request, response) {
   pg.connect(process.env.DATABASE_URL, function(err, client, done) {
     client.query('SELECT * FROM test_table', function(err, result) {
@@ -72,3 +124,5 @@ app.get('/db', function (request, response) {
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
+
+module.exports = app;
